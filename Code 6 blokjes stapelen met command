@@ -41,6 +41,22 @@ def pick_up_block(color, stack_level):
     m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
     m_lite.set_endeffector_suctioncup(enable=True, on=False)
 
+    return color, block_number, stack_z
+
+def return_stacked_blocks(stacked_blocks):
+    for color, block_number, stack_z in reversed(stacked_blocks):
+        pickup_x, pickup_y, pickup_z = block_position[color][block_number]
+
+        # Pick up the block from the stack
+        m_lite.set_homecmd()
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
+        m_lite.set_endeffector_suctioncup(enable=True, on=True)
+
+        # Return it to its original position
+        m_lite.set_homecmd()
+        m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
+        m_lite.set_endeffector_suctioncup(enable=True, on=False)
+
 order = get_color_order()
 
 color_names = {
@@ -52,9 +68,15 @@ color_names = {
 
 print("Stacking order from bottom to top...")
 
+stacked_blocks = []
 for stack_level, color in enumerate(order):
     print("Placing", color_names[color], "at level", stack_level + 1)
-    pick_up_block(color, stack_level)
+    stacked_blocks.append(pick_up_block(color, stack_level))
 
 m_lite.set_homecmd()
 print("Stacking complete.")
+
+input("Press Enter to return the blocks to their original positions.")
+return_stacked_blocks(stacked_blocks)
+m_lite.set_homecmd()
+print("Blocks returned.")
