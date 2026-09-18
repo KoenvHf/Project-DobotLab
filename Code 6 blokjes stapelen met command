@@ -24,6 +24,13 @@ def get_color_order():
             return order
         print("Invalid order. Enter 1 to 6 blocks and use each color no more than twice.")
 
+def wait_for_return_command():
+    while True:
+        command = input("Type R or RETURN to return the blocks: ").strip().upper()
+        if command in ("R", "RETURN"):
+            return
+        print("Invalid command. Type R or RETURN.")
+
 used_blocks = {"G" : 0, "B" : 0, "Y" : 0, "R" : 0} 
 
 def pick_up_block(color, stack_level):
@@ -81,7 +88,7 @@ for stack_level, color in enumerate(order):
 m_lite.set_homecmd()
 print("Stacking complete.")
 
-input("Press Enter to return the blocks to their original positions.")
+wait_for_return_command()
 return_stacked_blocks(stacked_blocks)
 m_lite.set_homecmd()
 print("Blocks returned.")
