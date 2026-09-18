@@ -1,5 +1,6 @@
 # version: Python3
 from DobotEDU import *
+import time
 
 # Pick-up positions
 block_position = {
@@ -35,11 +36,13 @@ def pick_up_block(color, stack_level):
     m_lite.set_homecmd()
     m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
     m_lite.set_endeffector_suctioncup(enable=True, on=True)
+    time.sleep(1)
 
     # Move to stack
     m_lite.set_homecmd()
     m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
     m_lite.set_endeffector_suctioncup(enable=True, on=False)
+    time.sleep(1)
 
     return color, block_number, stack_z
 
@@ -51,11 +54,13 @@ def return_stacked_blocks(stacked_blocks):
         m_lite.set_homecmd()
         m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
         m_lite.set_endeffector_suctioncup(enable=True, on=True)
+        time.sleep(1)
 
         # Return it to its original position
         m_lite.set_homecmd()
         m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
         m_lite.set_endeffector_suctioncup(enable=True, on=False)
+        time.sleep(1)
 
 order = get_color_order()
 
