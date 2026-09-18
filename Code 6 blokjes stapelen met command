@@ -14,6 +14,7 @@ block_position = {
 stack_x = 305.21
 stack_y = 97.13
 stack_heights = (-43.10, -32.10, -21.10, -10.10, 0.90, 11.90, 22.90, 33.90)
+movement_settle_time = 1
 
 def get_color_order():
     while True:
@@ -42,12 +43,14 @@ def pick_up_block(color, stack_level):
     # Go to block
     m_lite.set_homecmd()
     m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
+    time.sleep(movement_settle_time)
     m_lite.set_endeffector_suctioncup(enable=True, on=True)
     time.sleep(1)
 
     # Move to stack
     m_lite.set_homecmd()
     m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
+    time.sleep(movement_settle_time)
     m_lite.set_endeffector_suctioncup(enable=True, on=False)
     time.sleep(1)
 
@@ -60,12 +63,14 @@ def return_stacked_blocks(stacked_blocks):
         # Pick up the block from the stack
         m_lite.set_homecmd()
         m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
+        time.sleep(movement_settle_time)
         m_lite.set_endeffector_suctioncup(enable=True, on=True)
         time.sleep(1)
 
         # Return it to its original position
         m_lite.set_homecmd()
         m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
+        time.sleep(movement_settle_time)
         m_lite.set_endeffector_suctioncup(enable=True, on=False)
         time.sleep(1)
 
