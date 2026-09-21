@@ -4,10 +4,10 @@ import time
 
 # Pick-up positions
 block_position = {
-    "G": [(280.95, -30.00, -42.38), (299.39, -30.00, -42.38), (317.65, -30.00, -42.38), (336.00, -30.00, -42.38)],
-    "B": [(280.95, -10.00, -42.38), (299.39, -10.00, -42.38), (317.65, -10.00, -42.38),	(336.00, -10.00, -42.38)],
-    "Y": [(280.95, 10.00, -42.38), (299.39, 10.00, -42.38), (317.65, 10.00, -42.38), (336.00, 10.00, -42.38)],
-    "R": [(280.95, 30.00, -42.38), (299.39, 30.00, -42.38), (317.65, 30.00, -42.38), (336.00, 30.00, -42.38)]
+    "G": [(280.95, -30.00, -44.49), (299.39, -30.00, -44.49), (317.65, -30.00, -44.49), (336.00, -30.00, -44.49)],
+    "B": [(280.95, -10.00, -44.49), (299.39, -10.00, -44.49), (317.65, -10.00, -44.49),	(336.00, -10.00, -44.49)],
+    "Y": [(280.95, 10.00, -44.49), (299.39, 10.00, -44.49), (317.65, 10.00, -44.49), (336.00, 10.00, -44.49)],
+    "R": [(280.95, 30.00, -44.49), (299.39, 30.00, -44.49), (317.65, 30.00, -44.49), (336.00, 30.00, -44.49)]
 }
 
 # Stack position
@@ -15,6 +15,7 @@ stack_x = 305.21
 stack_y = 97.13
 stack_heights = (-43.10, -32.10, -21.10, -10.10, 0.90, 11.90, 22.90, 33.90)
 movement_settle_time = 1
+pickup_clearance = 20
 
 def get_color_order():
     while True:
@@ -40,19 +41,21 @@ def pick_up_block(color, stack_level):
     stack_z = stack_heights[stack_level]
     used_blocks[color] += 1
 
-    # Go to block
+    # Approach the block from above
     m_lite.set_homecmd()
-    m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
-    time.sleep(movement_settle_time)
+    m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z + pickup_clearance, r=0)
+    # Enable suction before descending onto the block.
     m_lite.set_endeffector_suctioncup(enable=True, on=True)
-    time.sleep(1)
+    m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
 
-    # Move to stack
+    # Lift the block before moving to the stack
+    m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z + pickup_clearance, r=0)
+
+    # Move above the stack, then descend to the stack level
     m_lite.set_homecmd()
+    m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z + pickup_clearance, r=0)
     m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
-    time.sleep(movement_settle_time)
     m_lite.set_endeffector_suctioncup(enable=True, on=False)
-    time.sleep(1)
 
     return color, block_number, stack_z
 
@@ -60,15 +63,25 @@ def return_stacked_blocks(stacked_blocks):
     for color, block_number, stack_z in reversed(stacked_blocks):
         pickup_x, pickup_y, pickup_z = block_position[color][block_number]
 
-        # Pick up the block from the stack
+        # Move away from the previously released block with suction off.
+        m_lite.set_endeffector_suctioncup(enable=True, on=False)
         m_lite.set_homecmd()
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z + pickup_clearance, r=0)
+        time.sleep(movement_settle_time)
+        # Enable suction above the stack block before descending.
+        m_lite.set_endeffector_suctioncup(enable=True, on=True)
         m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
         time.sleep(movement_settle_time)
-        m_lite.set_endeffector_suctioncup(enable=True, on=True)
         time.sleep(1)
 
-        # Return it to its original position
+        # Lift the block before moving to its original position
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z + pickup_clearance, r=0)
+        time.sleep(movement_settle_time)
+
+        # Move above the original position, then descend to it
         m_lite.set_homecmd()
+        m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z + pickup_clearance, r=0)
+        time.sleep(movement_settle_time)
         m_lite.set_ptpcmd(ptp_mode=1, x=pickup_x, y=pickup_y, z=pickup_z, r=0)
         time.sleep(movement_settle_time)
         m_lite.set_endeffector_suctioncup(enable=True, on=False)
