@@ -61,9 +61,10 @@ def pick_up_block(color, stack_level):
     return color, block_number, stack_z
 
 def return_stacked_blocks(stacked_blocks):
+    return_heights = stack_heights_for_return[-len(stacked_blocks):]
     for return_level, (color, block_number, stack_z) in enumerate(reversed(stacked_blocks)):
         pickup_x, pickup_y, pickup_z = block_position[color][block_number]
-        return_stack_z = stack_heights_for_return[return_level]
+        return_stack_z = return_heights[return_level]
 
         # Move away from the previously released block with suction off.
         m_lite.set_endeffector_suctioncup(enable=True, on=False)
