@@ -13,7 +13,8 @@ block_position = {
 # Stack position
 stack_x = 305.21
 stack_y = 97.13
-stack_heights = (15.59, 6.10, -6.34, -17.37, -29.87, -42.37)
+stack_heights_for_stacking = (-43.10, -32.10, -21.10, -10.10, 0.90, 11.90)
+stack_heights_for_return = (15.59, 6.10, -6.34, -17.37, -29.87, -42.37)
 movement_settle_time = 1
 pickup_clearance = 20
 
@@ -38,7 +39,7 @@ used_blocks = {"G" : 0, "B" : 0, "Y" : 0, "R" : 0}
 def pick_up_block(color, stack_level):
     block_number = used_blocks[color]
     pickup_x, pickup_y, pickup_z = block_position[color][block_number]
-    stack_z = stack_heights[stack_level]
+    stack_z = stack_heights_for_stacking[stack_level]
     used_blocks[color] += 1
 
     # Approach the block from above
@@ -60,22 +61,23 @@ def pick_up_block(color, stack_level):
     return color, block_number, stack_z
 
 def return_stacked_blocks(stacked_blocks):
-    for color, block_number, stack_z in reversed(stacked_blocks):
+    for return_level, (color, block_number, stack_z) in enumerate(reversed(stacked_blocks)):
         pickup_x, pickup_y, pickup_z = block_position[color][block_number]
+        return_stack_z = stack_heights_for_return[len(stacked_blocks) - 1 - return_level]
 
         # Move away from the previously released block with suction off.
         m_lite.set_endeffector_suctioncup(enable=True, on=False)
         m_lite.set_homecmd()
-        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z + pickup_clearance, r=0)
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=return_stack_z + pickup_clearance, r=0)
         time.sleep(movement_settle_time)
         # Enable suction above the stack block before descending.
         m_lite.set_endeffector_suctioncup(enable=True, on=True)
-        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z, r=0)
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=return_stack_z, r=0)
         time.sleep(movement_settle_time)
         time.sleep(1)
 
         # Lift the block before moving to its original position
-        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=stack_z + pickup_clearance, r=0)
+        m_lite.set_ptpcmd(ptp_mode=1, x=stack_x, y=stack_y, z=return_stack_z + pickup_clearance, r=0)
         time.sleep(movement_settle_time)
 
         # Move above the original position, then descend to it
