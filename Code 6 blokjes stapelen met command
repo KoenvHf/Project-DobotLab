@@ -13,7 +13,7 @@ block_position = {
 # Stack position
 stack_x = 305.21
 stack_y = 97.13
-stack_heights = (-43.10, -32.10, -21.10, -10.10, 0.90, 11.90, 22.90, 33.90)
+stack_heights = (15.59, 6.10, -6.34, -17.37, -29.87, -42.37)
 movement_settle_time = 1
 pickup_clearance = 20
 
